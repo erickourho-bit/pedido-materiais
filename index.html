@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pedido de Materiais — Grupo Ourho</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --navy:#0d1f3c;--navy2:#1a3a6b;--gold:#c9a227;--gold2:#e8c442;
+  --pale:#fef9e7;--surface:#f5f7ff;--bdr:#e2e8f0;
+  --txt:#111827;--muted:#6b7280;--red:#dc2626;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+body{font-family:var(--font);background:var(--surface);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,#0a1628,var(--navy),var(--navy2));
+  padding:12px 16px;display:flex;align-items:center;gap:10px;
+  position:sticky;top:0;z-index:200;border-bottom:2px solid var(--gold);}
+.hdr-logo{width:42px;height:42px;border-radius:50%;border:2px solid var(--gold);
+  background:var(--navy2);display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;font-weight:900;color:var(--gold2);}
+.hdr-title{font-size:15px;font-weight:800;color:var(--gold2);}
+.hdr-sub{font-size:11px;color:#94a3b8;}
+.hdr-cart{margin-left:auto;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:800;
+  color:var(--navy);cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.cart-n{background:var(--navy);color:var(--gold2);border-radius:10px;
+  padding:1px 7px;font-size:11px;font-weight:800;}
+
+/* TABS */
+.tabs{display:flex;background:var(--navy);border-bottom:2px solid var(--gold);
+  position:sticky;top:66px;z-index:199;overflow-x:auto;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex:1;min-width:60px;padding:10px 4px;text-align:center;font-size:10px;
+  font-weight:700;color:#94a3b8;cursor:pointer;border-bottom:3px solid transparent;
+  margin-bottom:-2px;text-transform:uppercase;letter-spacing:.3px;transition:color .15s;}
+.tab.on{color:var(--gold2);border-bottom-color:var(--gold);}
+.tab-ic{font-size:18px;display:block;margin-bottom:2px;}
+
+/* SECTIONS */
+.sec{display:none;padding:14px;}
+.sec.on{display:block;}
+
+/* CARDS */
+.card{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.08);
+  padding:16px;margin-bottom:14px;border-top:3px solid var(--gold);}
+.card-title{font-size:12px;font-weight:800;color:var(--navy2);text-transform:uppercase;
+  letter-spacing:.6px;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.card-title::before{content:'';width:3px;height:14px;background:var(--gold);
+  border-radius:2px;display:inline-block;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--navy2);
+  margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px;}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;
+  border:1.5px solid var(--bdr);border-radius:8px;font-size:15px;
+  font-family:var(--font);background:#fff;color:var(--txt);}
+.field input:focus,.field select:focus,.field textarea:focus{
+  outline:none;border-color:var(--gold);}
+.field textarea{min-height:70px;resize:vertical;}
+
+/* SEARCH + CHIPS */
+.srch-wrap{position:relative;margin-bottom:12px;}
+.srch-wrap input{width:100%;padding:11px 14px 11px 40px;border:1.5px solid var(--bdr);
+  border-radius:10px;font-size:15px;background:#fff;}
+.srch-wrap input:focus{outline:none;border-color:var(--gold);}
+.srch-ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  color:var(--gold);font-size:16px;}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;}
+.chips::-webkit-scrollbar{display:none;}
+.chip{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;
+  cursor:pointer;border:1.5px solid var(--bdr);background:#fff;color:var(--muted);
+  text-transform:uppercase;}
+.chip.on{background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--navy);border-color:var(--gold);}
+
+/* PRODUCT GRID */
+.pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+@media(min-width:500px){.pgrid{grid-template-columns:repeat(3,1fr);}}
+@media(min-width:800px){.pgrid{grid-template-columns:repeat(4,1fr);}}
+
+.pcard{background:#fff;border-radius:12px;padding:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.07);border:1.5px solid var(--bdr);
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  cursor:pointer;position:relative;overflow:hidden;}
+.pcard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.pcard.mat::before{background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.pcard.desc::before{background:linear-gradient(90deg,#ea580c,#f97316);}
+.pcard.eqp::before{background:linear-gradient(90deg,var(--navy2),#2563eb);}
+.pcard.sel{border-color:var(--gold);background:var(--pale);}
+.pcard:active{transform:scale(.97);}
+.pcard-em{font-size:32px;margin:6px 0;}
+.pcard-name{font-size:11px;font-weight:600;line-height:1.3;margin-bottom:4px;min-height:26px;}
+.pcard-tag{font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;margin-bottom:7px;}
+.pcard-tag.mat{background:var(--pale);color:#92400e;}
+.pcard-tag.desc{background:#ffedd5;color:#c2410c;}
+.pcard-tag.eqp{background:#e0e7ff;color:#3730a3;}
+.pcard-vars{font-size:9px;font-weight:700;background:var(--navy);color:var(--gold2);
+  padding:2px 8px;border-radius:10px;margin-bottom:7px;}
+.pcard-bdg{position:absolute;top:6px;right:6px;background:var(--gold);
+  color:var(--navy);border-radius:50%;width:20px;height:20px;
+  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;}
+.add-btn{width:100%;padding:8px;border:none;border-radius:8px;font-size:11px;
+  font-weight:700;cursor:pointer;}
+.pcard:not(.sel) .add-btn{background:var(--navy);color:#fff;}
+.pcard.sel .add-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);}
+
+/* CUSTOM BAR */
+.cbar{background:linear-gradient(135deg,var(--navy),var(--navy2));
+  border-radius:12px;padding:14px;margin-top:14px;border:1px solid #d4a827;}
+.cbar-title{font-size:12px;font-weight:800;color:var(--gold2);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+.crow{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.cin{flex:1;min-width:100px;padding:9px 12px;border:1.5px solid rgba(201,162,39,.4);
+  border-radius:8px;font-size:14px;font-family:var(--font);
+  background:rgba(255,255,255,.1);color:#fff;}
+.cin::placeholder{color:rgba(255,255,255,.4);}
+.cin:focus{outline:none;border-color:var(--gold);}
+.cin option{background:#0d1f3c;color:#fff;}
+.cadd{padding:9px 16px;border:none;border-radius:8px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--navy);font-size:13px;font-weight:800;cursor:pointer;flex-shrink:0;}
+.cok{display:none;margin-top:8px;padding:8px 12px;border-radius:6px;
+  background:rgba(201,162,39,.2);border:1px solid var(--gold);
+  color:var(--gold2);font-size:12px;font-weight:700;}
+
+/* CART */
+.cart-empty{text-align:center;padding:40px 16px;color:var(--muted);}
+.csec-title{font-size:11px;font-weight:800;text-transform:uppercase;
+  padding:7px 12px;border-radius:8px;margin:14px 0 8px;}
+.csec-mat{background:var(--pale);color:#92400e;}
+.csec-desc{background:#ffedd5;color:#c2410c;}
+.csec-eqp{background:#e0e7ff;color:#3730a3;}
+.citem{background:#fff;border-radius:10px;padding:10px 12px;margin-bottom:8px;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid var(--bdr);}
+.citem.custom{border:1.5px solid #d4a827;background:var(--pale);}
+.cem{font-size:22px;flex-shrink:0;}
+.cinfo{flex:1;min-width:0;}
+.cname{font-size:13px;font-weight:700;}
+.cnew{display:inline-block;background:var(--gold);color:var(--navy);
+  font-size:9px;font-weight:800;padding:2px 6px;border-radius:10px;
+  text-transform:uppercase;margin-left:4px;vertical-align:middle;}
+.cobs input{border:none;background:transparent;font-size:11px;color:var(--muted);
+  width:100%;font-family:var(--font);padding:0;margin-top:2px;}
+.cobs input:focus{outline:none;color:var(--txt);}
+.qctrl{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.qbtn{width:28px;height:28px;border:1.5px solid var(--bdr);border-radius:6px;
+  background:#fff;font-size:16px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;}
+.qval{min-width:26px;text-align:center;font-size:14px;font-weight:800;}
+.dbtn{width:28px;height:28px;border:none;background:#fee2e2;color:var(--red);
+  border-radius:6px;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;}
+.totals{background:var(--navy);border-radius:12px;padding:14px;
+  margin-top:14px;border:1px solid #d4a827;}
+.trow{display:flex;justify-content:space-between;font-size:13px;
+  padding:5px 0;color:#e8eaf0;}
+.trow.bold{font-weight:800;font-size:15px;color:var(--gold2);
+  border-top:1px solid rgba(201,162,39,.3);margin-top:6px;padding-top:10px;}
+.actions{display:flex;gap:10px;margin-top:14px;padding-bottom:30px;}
+.btnp{flex:1;padding:13px;border:none;border-radius:10px;
+  font-size:14px;font-weight:800;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:6px;}
+.btnp-pri{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);}
+.btnp-sec{background:var(--navy);color:#e8eaf0;}
+.next-btn{width:100%;padding:13px;border:none;border-radius:10px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--navy);font-size:14px;font-weight:800;cursor:pointer;margin-top:6px;}
+
+/* MODAL */
+.modal-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,22,40,.7);
+  z-index:999;display:none;align-items:flex-end;justify-content:center;}
+.modal-bg.on{display:flex;}
+.modal-box{background:#fff;width:100%;max-width:500px;border-radius:16px 16px 0 0;
+  padding:20px;max-height:75vh;overflow-y:auto;border-top:3px solid var(--gold);}
+.modal-title{font-size:15px;font-weight:800;color:var(--txt);margin-bottom:16px;}
+
+/* PDF OVERLAY */
+#pdf-ov{position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;
+  z-index:9999;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;}
+#pdf-ov.on{display:block;}
+#pdf-btns{position:sticky;top:0;background:var(--navy);padding:10px 16px;
+  display:flex;gap:10px;border-bottom:2px solid var(--gold);}
+#pdf-body{padding:20px;max-width:800px;margin:0 auto;font-family:Arial,sans-serif;}
+@media print{#pdf-btns{display:none!important;}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-logo">G</div>
+  <div>
+    <div class="hdr-title">Pedido de Materiais</div>
+    <div class="hdr-sub">Grupo Ourho — Sistema ASG</div>
+  </div>
+  <button class="hdr-cart" onclick="goTab('carrinho')">
+    🛒 <span class="cart-n" id="cart-n">0</span>
+  </button>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab on" id="t-info" onclick="goTab('info')">
+    <span class="tab-ic">👤</span>Posto
+  </div>
+  <div class="tab" id="t-materiais" onclick="goTab('materiais')">
+    <span class="tab-ic">🧴</span>Materiais
+  </div>
+  <div class="tab" id="t-descartaveis" onclick="goTab('descartaveis')">
+    <span class="tab-ic">🧻</span>Descart.
+  </div>
+  <div class="tab" id="t-equipamentos" onclick="goTab('equipamentos')">
+    <span class="tab-ic">🔧</span>Equipam.
+  </div>
+  <div class="tab" id="t-carrinho" onclick="goTab('carrinho')">
+    <span class="tab-ic">🛒</span>Pedido
+  </div>
+</div>
+
+<!-- POSTO -->
+<div class="sec on" id="s-info">
+  <div class="card">
+    <div class="card-title">Dados do Posto</div>
+    <div class="field">
+      <label>Nome do Posto / Cliente</label>
+      <input type="text" id="posto-nome" placeholder="Ex: Condominio Residencial ABC">
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Dados da ASG / Lider</div>
+    <div class="field">
+      <label>Nome Completo</label>
+      <input type="text" id="asg-nome" placeholder="Seu nome completo">
+    </div>
+    <div class="field">
+      <label>Funcao</label>
+      <select id="asg-func">
+        <option value="ASG">ASG</option>
+        <option value="Lider de Posto">Lider de Posto</option>
+        <option value="Zelador">Zelador</option>
+        <option value="Encarregado">Encarregado</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Observacoes Gerais</label>
+      <textarea id="ped-obs" placeholder="Ex: itens urgentes, substituicao de equipamento..."></textarea>
+    </div>
+  </div>
+  <button class="next-btn" onclick="goTab('materiais')">Proximo: Selecionar Produtos →</button>
+</div>
+
+<!-- MATERIAIS -->
+<div class="sec" id="s-materiais">
+  <div class="srch-wrap">
+    <span class="srch-ic">🔍</span>
+    <input type="text" id="srch-mat" placeholder="Buscar material..." oninput="renderCat('mat')">
+  </div>
+  <div class="chips" id="chips-mat"></div>
+  <div class="pgrid" id="grid-mat"></div>
+  <div class="cbar">
+    <div class="cbar-title">+ Item Nao Cadastrado</div>
+    <div class="crow">
+      <input class="cin" type="text" id="cn-mat" placeholder="Nome do produto...">
+      <select class="cin" id="ct-mat" style="max-width:130px;flex-shrink:0;">
+        <option value="material" selected>Material</option>
+        <option value="descartavel">Descartavel</option>
+        <option value="equipamento">Equipamento</option>
+      </select>
+    </div>
+    <div class="crow">
+      <input class="cin" type="number" id="cq-mat" value="1" min="1" style="max-width:80px;flex-shrink:0;">
+      <input class="cin" type="text" id="co-mat" placeholder="Obs: urgente, tamanho...">
+      <button class="cadd" onclick="addCustom('mat')">+ Add</button>
+    </div>
+    <div class="cok" id="cok-mat"></div>
+  </div>
+</div>
+
+<!-- DESCARTAVEIS -->
+<div class="sec" id="s-descartaveis">
+  <div class="srch-wrap">
+    <span class="srch-ic">🔍</span>
+    <input type="text" id="srch-desc" placeholder="Buscar descartavel..." oninput="renderCat('desc')">
+  </div>
+  <div class="chips" id="chips-desc"></div>
+  <div class="pgrid" id="grid-desc"></div>
+  <div class="cbar">
+    <div class="cbar-title">+ Item Nao Cadastrado</div>
+    <div class="crow">
+      <input class="cin" type="text" id="cn-desc" placeholder="Nome do produto...">
+      <select class="cin" id="ct-desc" style="max-width:130px;flex-shrink:0;">
+        <option value="descartavel" selected>Descartavel</option>
+        <option value="material">Material</option>
+        <option value="equipamento">Equipamento</option>
+      </select>
+    </div>
+    <div class="crow">
+      <input class="cin" type="number" id="cq-desc" value="1" min="1" style="max-width:80px;flex-shrink:0;">
+      <input class="cin" type="text" id="co-desc" placeholder="Obs: urgente, tamanho...">
+      <button class="cadd" onclick="addCustom('desc')">+ Add</button>
+    </div>
+    <div class="cok" id="cok-desc"></div>
+  </div>
+</div>
+
+<!-- EQUIPAMENTOS -->
+<div class="sec" id="s-equipamentos">
+  <div class="srch-wrap">
+    <span class="srch-ic">🔍</span>
+    <input type="text" id="srch-eqp" placeholder="Buscar equipamento..." oninput="renderCat('eqp')">
+  </div>
+  <div class="chips" id="chips-eqp"></div>
+  <div class="pgrid" id="grid-eqp"></div>
+  <div class="cbar">
+    <div class="cbar-title">+ Item Nao Cadastrado</div>
+    <div class="crow">
+      <input class="cin" type="text" id="cn-eqp" placeholder="Nome do produto...">
+      <select class="cin" id="ct-eqp" style="max-width:130px;flex-shrink:0;">
+        <option value="equipamento" selected>Equipamento</option>
+        <option value="material">Material</option>
+        <option value="descartavel">Descartavel</option>
+      </select>
+    </div>
+    <div class="crow">
+      <input class="cin" type="number" id="cq-eqp" value="1" min="1" style="max-width:80px;flex-shrink:0;">
+      <input class="cin" type="text" id="co-eqp" placeholder="Obs: urgente, tamanho...">
+      <button class="cadd" onclick="addCustom('eqp')">+ Add</button>
+    </div>
+    <div class="cok" id="cok-eqp"></div>
+  </div>
+</div>
+
+<!-- CARRINHO -->
+<div class="sec" id="s-carrinho">
+  <div class="cart-empty" id="cart-empty">
+    <div style="font-size:52px;margin-bottom:10px;">🛒</div>
+    <div style="font-weight:800;font-size:15px;margin-bottom:6px;">Carrinho vazio</div>
+    <div style="font-size:13px;">Selecione produtos nas abas acima</div>
+  </div>
+  <div id="cart-list"></div>
+  <div class="totals" id="cart-totals" style="display:none">
+    <div class="trow"><span>Materiais/Quimicos</span><span id="tot-mat">0</span></div>
+    <div class="trow"><span>Descartaveis</span><span id="tot-desc">0</span></div>
+    <div class="trow"><span>Equipamentos</span><span id="tot-eqp">0</span></div>
+    <div class="trow bold"><span>TOTAL DO PEDIDO</span><span id="tot-all">0 itens</span></div>
+  </div>
+  <div class="actions" id="cart-actions" style="display:none">
+    <button class="btnp btnp-sec" onclick="clearCart()">Limpar</button>
+    <button class="btnp btnp-pri" onclick="genPDF()">Gerar PDF</button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg" onclick="closeMod(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title" id="modal-title">Selecionar</div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- PDF OVERLAY -->
+<div id="pdf-ov">
+  <div id="pdf-btns">
+    <button onclick="closePDF()" style="flex:1;padding:11px;background:#1a3a6b;color:#e8c442;border:none;border-radius:8px;font-size:14px;font-weight:800;cursor:pointer;">← Voltar</button>
+    <button onclick="window.print()" style="flex:2;padding:11px;background:linear-gradient(135deg,#c9a227,#e8c442);color:#0a1628;border:none;border-radius:8px;font-size:14px;font-weight:800;cursor:pointer;">Imprimir / Salvar PDF</button>
+  </div>
+  <div id="pdf-body"></div>
+</div>
+
+<script>
+// ── CATALOGO ─────────────────────────────────────────────────
+var CAT = {
+  mat: [
+    {n:"Alcool 46%",c:"Quimico",u:"L",e:"🧴"},
+    {n:"Alcool 70%",c:"Quimico",u:"L",e:"🧴"},
+    {n:"Alcool Gel Antisseptico",c:"Quimico",u:"und",e:"🧴"},
+    {n:"Alcool Perfumado",c:"Quimico",u:"L",e:"🧴"},
+    {n:"Azulim",c:"Quimico",u:"und",e:"🧪"},
+    {n:"Cloro 5%",c:"Quimico",u:"L",e:"🫧"},
+    {n:"Desinfetante Alta Diluicao",c:"Quimico",u:"L",e:"🧹"},
+    {n:"Desinfetante Concentrado",c:"Quimico",u:"L",e:"🧹",v:["Campestre","Lavanda","Pinho","Peroxido de Hidrogenio"]},
+    {n:"Detergente",c:"Quimico",u:"L",e:"🫧",v:["Neutro 1L","Clorado 1L","Desengraxante 1L","De Loca"]},
+    {n:"Limpa Aluminio",c:"Quimico",u:"L",e:"✨"},
+    {n:"Limpa Carpete",c:"Quimico",u:"L",e:"✨"},
+    {n:"Limpa Inox",c:"Quimico",u:"L",e:"✨"},
+    {n:"Limpa Pedra",c:"Quimico",u:"L",e:"🪨"},
+    {n:"Limpa Vidro",c:"Quimico",u:"L",e:"🪟"},
+    {n:"Limpador Desincrustante Acido",c:"Quimico",u:"L",e:"🧴"},
+    {n:"Limpador Flotacao",c:"Quimico",u:"L",e:"✨"},
+    {n:"Limpador para Lavadora",c:"Quimico",u:"L",e:"🧴"},
+    {n:"Limpador Brisa do Campo",c:"Quimico",u:"L",e:"🌿"},
+    {n:"Limpador Klyo Oxy",c:"Quimico",u:"L",e:"🧴"},
+    {n:"Limpador Veja",c:"Quimico",u:"und",e:"🧴"},
+    {n:"Lustra Moveis",c:"Quimico",u:"und",e:"✨"},
+    {n:"Pasta Odorizadora Gelly",c:"Aromatizante",u:"und",e:"🌸"},
+    {n:"Pastilha Sanitaria",c:"Aromatizante",u:"und",e:"🚽"},
+    {n:"Pedra Sanitaria",c:"Quimico",u:"und",e:"🚽"},
+    {n:"Refil Alcool Gel",c:"Quimico",u:"und",e:"🧴"},
+    {n:"Removedor de Cera",c:"Quimico",u:"L",e:"🧴",v:["Audax 1L","Stripper 1L","Suprema"]},
+    {n:"Renova Inox",c:"Quimico",u:"L",e:"✨"},
+    {n:"Sabao em Pedra",c:"Quimico",u:"und",e:"🧼"},
+    {n:"Sabao em Po",c:"Quimico",u:"und",e:"🧼"},
+    {n:"Sabonete Audax Desengraxante",c:"Quimico",u:"L",e:"🧴"},
+    {n:"Sanlimp",c:"Quimico",u:"L",e:"🧴"},
+    {n:"Sapolio Cremoso",c:"Quimico",u:"und",e:"🧹"},
+    {n:"Tablete para Caixa Acoplada",c:"Quimico",u:"und",e:"🚽"},
+    {n:"Tela de Mictorio Aromatizante",c:"Aromatizante",u:"und",e:"🌸"},
+    {n:"Aromatizante Coala",c:"Aromatizante",u:"und",e:"🌸",v:["Algodao","Bambu","Capim Limao","Cha Branco","Citronela","Floral","Lavanda","Orquidea Negra","Talco"]},
+    {n:"Aromatizante Sanol Lavanda",c:"Aromatizante",u:"und",e:"🌸"},
+    {n:"Cera",c:"Cera",u:"L",e:"✨",v:["Incolor 1L","Maxima Brilho HS 1L","Premium UHS 1L","Pretita","Vermelha 1L"]},
+    {n:"Disco Enceradeira",c:"Disco",u:"und",e:"⭕",v:["Branco 510mm","Preto 410mm","Preto 510mm","Verde 310mm","Verde 410mm","Verde 510mm","Vermelho 510mm"]},
+    {n:"Balde",c:"Utensilio",u:"und",e:"🪣",v:["1 Litro","4 Litros","8 Litros","10 Litros","15 Litros"]},
+    {n:"Bilha Inox 1 Litro",c:"Utensilio",u:"und",e:"🫙"},
+    {n:"Borrifador 1 Litro",c:"Utensilio",u:"und",e:"💦"},
+    {n:"Desentupidor",c:"Utensilio",u:"und",e:"🔧",v:["Banheiro","Pia"]},
+    {n:"Escova para Tanque",c:"Utensilio",u:"und",e:"🪥"},
+    {n:"Esfregao 30 cm",c:"Utensilio",u:"und",e:"🧹"},
+    {n:"Espanador",c:"Utensilio",u:"und",e:"🪶",v:["60cm","M2 20cm","M2 60cm"]},
+    {n:"Esponja de Aco",c:"Utensilio",u:"und",e:"🟫"},
+    {n:"Esponja Dupla Face",c:"Utensilio",u:"und",e:"🧽"},
+    {n:"Esponja Magica",c:"Utensilio",u:"und",e:"✨"},
+    {n:"Fibra de Limpeza",c:"Utensilio",u:"und",e:"🧽",v:["Leve Branca","Pesada Preta","Uso Geral Verde"]},
+    {n:"Flanela",c:"Utensilio",u:"und",e:"🧺"},
+    {n:"Pa de Lixo com Cabo",c:"Utensilio",u:"und",e:"🗑️"},
+    {n:"Pano de Chao",c:"Utensilio",u:"und",e:"🧺"},
+    {n:"Rodo Puxa Seca",c:"Utensilio",u:"und",e:"🧹",v:["40 cm","60 cm"]},
+    {n:"Vassoura",c:"Vassoura",u:"und",e:"🧹",v:["de Palha","de Pelo 40cm","de Pelo 60cm","de Pelo 120cm","Gari","Lavatina c/ Suporte","Lavatina s/ Suporte","Limpa Teto","Nylon Novica","Piacava"]}
+  ],
+  desc: [
+    {n:"Papel Higienico Rolao",c:"Papel",u:"fardo",e:"🧻",v:["8x250m","8x500m"]},
+    {n:"Papel Higienico Rolinho",c:"Papel",u:"pct",e:"🧻",v:["Folha Dupla","Folha Simples"]},
+    {n:"Papel Higienico Interfolha Dupla",c:"Papel",u:"pct",e:"🧻"},
+    {n:"Papel Toalha Bobina",c:"Papel",u:"rolo",e:"🗒️",v:["2 Linha","6x200"]},
+    {n:"Papel Toalha Interfolha",c:"Papel",u:"pct",e:"🗒️",v:["1 Linha","2 Linha"]},
+    {n:"Glade Aero 360ml",c:"Higiene",u:"und",e:"🌬️"},
+    {n:"Inseticida SBP",c:"Higiene",u:"und",e:"🦟"},
+    {n:"Refil Bom Ar",c:"Higiene",u:"und",e:"🌬️"},
+    {n:"Refil Sabonete",c:"Higiene",u:"und",e:"🧴",v:["Erva Doce","Perolado","Sensitive 700ml"]},
+    {n:"Sabonete Liquido",c:"Higiene",u:"und",e:"🧴",v:["Erva Doce 1L","Pessego 1L"]},
+    {n:"Copo Descartavel",c:"Descartavel",u:"pct",e:"🥤",v:["Agua 180ml","Cafe 80ml"]},
+    {n:"Saco para Absorvente",c:"Descartavel",u:"rolo",e:"🗑️"},
+    {n:"Saco de Lixo Preto",c:"Saco de Lixo",u:"rolo",e:"🖤",v:["20L","40L","60L","100L","200L","300L"]},
+    {n:"Saco de Lixo Branco",c:"Saco de Lixo",u:"rolo",e:"🤍",v:["20L","40L","60L","100L"]},
+    {n:"Saco de Lixo Azul",c:"Saco de Lixo",u:"rolo",e:"💙",v:["20L","40L","60L","100L"]},
+    {n:"Saco de Lixo Cinza",c:"Saco de Lixo",u:"rolo",e:"🩶",v:["40L","100L","200L"]},
+    {n:"Saco de Lixo Verde",c:"Saco de Lixo",u:"rolo",e:"💚",v:["60L"]},
+    {n:"Saco de Lixo Vermelho",c:"Saco de Lixo",u:"rolo",e:"❤️",v:["40L","60L","100L"]},
+    {n:"Saco de Lixo Amarelo",c:"Saco de Lixo",u:"rolo",e:"💛",v:["40L"]},
+    {n:"Saco de Lixo Transparente",c:"Saco de Lixo",u:"rolo",e:"🫙",v:["60L"]}
+  ],
+  eqp: [
+    {n:"Aspirador de Po e Agua",c:"Limpeza",u:"und",e:"🔌"},
+    {n:"Enceradeira",c:"Limpeza",u:"und",e:"⚡",v:["300","400","500"]},
+    {n:"Extratora Karcher",c:"Limpeza",u:"und",e:"💧"},
+    {n:"Hidrojateadora",c:"Limpeza",u:"und",e:"💦"},
+    {n:"Balde Espremedor",c:"Limpeza",u:"und",e:"🪣"},
+    {n:"Carrinho Funcional",c:"Limpeza",u:"und",e:"🛒"},
+    {n:"Coletor de Lixo",c:"Limpeza",u:"und",e:"🗑️",v:["240L","360L"]},
+    {n:"Soprador",c:"Jardinagem",u:"und",e:"💨",v:["a Bateria","Costal Gasolina","Gasolina"]},
+    {n:"Rocadeira",c:"Jardinagem",u:"und",e:"🌿"},
+    {n:"Moto Poda",c:"Jardinagem",u:"und",e:"✂️"},
+    {n:"Cortador de Grama",c:"Jardinagem",u:"und",e:"🌱"},
+    {n:"Trator Cortador",c:"Jardinagem",u:"und",e:"🚜"},
+    {n:"Escada Aluminio",c:"Ferramentas",u:"und",e:"🪜",v:["5 Degraus","7 Degraus","12 Degraus"]},
+    {n:"Bastao de Ronda",c:"Seguranca",u:"und",e:"🔦"},
+    {n:"Camera de Peito",c:"Seguranca",u:"und",e:"📷"},
+    {n:"Placa Sinalizadora",c:"Seguranca",u:"und",e:"🚧",v:["Piso Molhado","Em Manutencao"]},
+    {n:"Radio HT",c:"Comunicacao",u:"und",e:"📻"},
+    {n:"Relogio de Ponto",c:"Administracao",u:"und",e:"🕐"},
+    {n:"Dispenser",c:"Higiene",u:"und",e:"🧴"}
+  ]
+};
+
+var CART = {};
+var MODAL_PROD = null;
+var MODAL_TYPE = null;
+var MODAL_QTD = 1;
+var ACTIVE_FILTERS = {mat:"",desc:"",eqp:""};
+
+// ── NAVIGATION ────────────────────────────────────────────────
+function goTab(tab) {
+  var tabs = ["info","materiais","descartaveis","equipamentos","carrinho"];
+  for (var i = 0; i < tabs.length; i++) {
+    var tb = document.getElementById("t-" + tabs[i]);
+    var sc = document.getElementById("s-" + tabs[i]);
+    if (tabs[i] === tab) {
+      if (tb) { tb.classList.add("on"); }
+      if (sc) { sc.style.display = "block"; sc.classList.add("on"); }
+    } else {
+      if (tb) { tb.classList.remove("on"); }
+      if (sc) { sc.style.display = "none"; sc.classList.remove("on"); }
+    }
+  }
+  if (tab === "materiais") { renderChips("mat"); renderCat("mat"); }
+  if (tab === "descartaveis") { renderChips("desc"); renderCat("desc"); }
+  if (tab === "equipamentos") { renderChips("eqp"); renderCat("eqp"); }
+  if (tab === "carrinho") { renderCart(); }
+  window.scrollTo(0, 0);
+}
+
+// ── CHIPS ─────────────────────────────────────────────────────
+function renderChips(type) {
+  var items = CAT[type];
+  var cats = [];
+  for (var i = 0; i < items.length; i++) {
+    if (cats.indexOf(items[i].c) < 0) cats.push(items[i].c);
+  }
+  var wrap = document.getElementById("chips-" + type);
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  var a = document.createElement("div");
+  a.className = "chip" + (ACTIVE_FILTERS[type] === "" ? " on" : "");
+  a.textContent = "Todos";
+  (function(t){ a.onclick = function(){ ACTIVE_FILTERS[t]=""; renderChips(t); renderCat(t); }; })(type);
+  wrap.appendChild(a);
+  for (var j = 0; j < cats.length; j++) {
+    var ch = document.createElement("div");
+    ch.className = "chip" + (ACTIVE_FILTERS[type] === cats[j] ? " on" : "");
+    ch.textContent = cats[j];
+    (function(c, t){ ch.onclick = function(){ ACTIVE_FILTERS[t]=c; renderChips(t); renderCat(t); }; })(cats[j], type);
+    wrap.appendChild(ch);
+  }
+}
+
+// ── CATALOG ───────────────────────────────────────────────────
+function getTypeLabel(type) {
+  if (type === "mat") return "material";
+  if (type === "desc") return "descartavel";
+  return "equipamento";
+}
+
+function countInCart(baseName, typeLabel) {
+  var keys = Object.keys(CART);
+  var n = 0;
+  for (var i = 0; i < keys.length; i++) {
+    var it = CART[keys[i]];
+    if (it.tipo === typeLabel && (it.prod.base === baseName || it.prod.nome === baseName)) n++;
+  }
+  return n;
+}
+
+function renderCat(type) {
+  var srchEl = document.getElementById("srch-" + type);
+  var srch = srchEl ? srchEl.value.toLowerCase() : "";
+  var catF = ACTIVE_FILTERS[type];
+  var tl = getTypeLabel(type);
+  var isMat = (type === "mat");
+  var isDesc = (type === "desc");
+  var grid = document.getElementById("grid-" + type);
+  if (!grid) return;
+  grid.innerHTML = "";
+
+  var items = CAT[type];
+  var filtered = [];
+  for (var i = 0; i < items.length; i++) {
+    var p = items[i];
+    if ((!srch || p.n.toLowerCase().indexOf(srch) >= 0) && (!catF || p.c === catF)) {
+      filtered.push(p);
+    }
+  }
+
+  if (!filtered.length) {
+    var em = document.createElement("div");
+    em.style.cssText = "grid-column:1/-1;text-align:center;padding:30px;color:#94a3b8;font-size:13px;";
+    em.textContent = "Nenhum produto encontrado";
+    grid.appendChild(em);
+    return;
+  }
+
+  for (var j = 0; j < filtered.length; j++) {
+    (function(prod, typeLabel, typeCode) {
+      var hasVars = prod.v && prod.v.length > 0;
+      var inCartN = countInCart(prod.n, typeLabel);
+      var inCart = inCartN > 0;
+
+      var card = document.createElement("div");
+      var typeClass = isMat ? "mat" : (isDesc ? "desc" : "eqp");
+      card.className = "pcard " + typeClass + (inCart ? " sel" : "");
+
+      if (inCart) {
+        var bdg = document.createElement("div");
+        bdg.className = "pcard-bdg";
+        bdg.textContent = hasVars ? inCartN + "v" : CART[typeLabel + ":" + prod.n] ? CART[typeLabel + ":" + prod.n].qtd : inCartN;
+        card.appendChild(bdg);
+      }
+
+      var emEl = document.createElement("div");
+      emEl.className = "pcard-em";
+      emEl.textContent = prod.e || "📦";
+
+      var nameEl = document.createElement("div");
+      nameEl.className = "pcard-name";
+      nameEl.textContent = prod.n;
+
+      if (hasVars) {
+        var varsEl = document.createElement("div");
+        varsEl.className = "pcard-vars";
+        varsEl.textContent = prod.v.length + " opcoes";
+        card.appendChild(emEl); card.appendChild(nameEl); card.appendChild(varsEl);
+      } else {
+        var tagEl = document.createElement("div");
+        tagEl.className = "pcard-tag " + typeClass;
+        tagEl.textContent = isMat ? "Consumo/Quimico" : (isDesc ? "Descartavel" : "Equipamento");
+        card.appendChild(emEl); card.appendChild(nameEl); card.appendChild(tagEl);
+      }
+
+      var btn = document.createElement("button");
+      btn.className = "add-btn";
+      btn.textContent = inCart ? (hasVars ? "Ver selecao" : "Adicionado") : "+ Adicionar";
+      btn.onclick = function(e) { e.stopPropagation(); openMod(prod, typeLabel); };
+      card.appendChild(btn);
+      grid.appendChild(card);
+    })(filtered[j], tl, type);
+  }
+}
+
+// ── MODAL ─────────────────────────────────────────────────────
+function openMod(prod, tipo) {
+  MODAL_PROD = prod;
+  MODAL_TYPE = tipo;
+  MODAL_QTD = 1;
+  var titleEl = document.getElementById("modal-title");
+  var bodyEl = document.getElementById("modal-body");
+  if (!titleEl || !bodyEl) return;
+  titleEl.textContent = (prod.e || "📦") + " " + prod.n;
+  bodyEl.innerHTML = "";
+
+  var hasVars = prod.v && prod.v.length > 0;
+
+  if (hasVars) {
+    var instr = document.createElement("div");
+    instr.style.cssText = "font-size:12px;color:#6b7280;font-weight:700;margin-bottom:12px;";
+    instr.textContent = "Selecione a opcao e quantidade:";
+    bodyEl.appendChild(instr);
+
+    for (var v = 0; v < prod.v.length; v++) {
+      (function(varNome) {
+        var key = tipo + ":" + prod.n + ":" + varNome;
+        var curQtd = CART[key] ? CART[key].qtd : 0;
+
+        var row = document.createElement("div");
+        row.style.cssText = "display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f1f5f9;";
+
+        var lbl = document.createElement("div");
+        lbl.style.cssText = "flex:1;font-size:13px;font-weight:" + (curQtd > 0 ? "800" : "600") + ";color:#0d1f3c;";
+        lbl.textContent = varNome;
+
+        var ctrl = document.createElement("div");
+        ctrl.style.cssText = "display:flex;align-items:center;gap:6px;flex-shrink:0;";
+
+        var dec = document.createElement("button");
+        dec.style.cssText = "width:30px;height:30px;border:1.5px solid #e2e8f0;border-radius:6px;background:#fff;font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;";
+        dec.textContent = "-";
+
+        var qv = document.createElement("div");
+        qv.style.cssText = "min-width:28px;text-align:center;font-size:16px;font-weight:800;color:#0d1f3c;";
+        qv.textContent = curQtd;
+
+        var inc = document.createElement("button");
+        inc.style.cssText = "width:30px;height:30px;border:none;border-radius:6px;background:linear-gradient(135deg,#c9a227,#e8c442);font-size:18px;font-weight:700;cursor:pointer;color:#0a1628;display:flex;align-items:center;justify-content:center;";
+        inc.textContent = "+";
+
+        (function(k, qEl, lEl) {
+          dec.onclick = function() {
+            var n = parseInt(qEl.textContent) || 0;
+            if (n > 0) {
+              n--;
+              qEl.textContent = n;
+              if (n === 0) {
+                delete CART[k];
+                lEl.style.fontWeight = "600";
+              } else {
+                CART[k].qtd = n;
+              }
+              updBadge();
+            }
+          };
+          inc.onclick = function() {
+            var n = parseInt(qEl.textContent) || 0;
+            n++;
+            qEl.textContent = n;
+            lEl.style.fontWeight = "800";
+            CART[k] = {
+              prod: {nome: prod.n + " " + varNome, base: prod.n, cat: prod.c, unid: prod.u},
+              qtd: n, tipo: tipo, obs: ""
+            };
+            updBadge();
+          };
+        })(key, qv, lbl);
+
+        ctrl.appendChild(dec); ctrl.appendChild(qv); ctrl.appendChild(inc);
+        row.appendChild(lbl); row.appendChild(ctrl);
+        bodyEl.appendChild(row);
+      })(prod.v[v]);
+    }
+
+    var doneBtn = document.createElement("button");
+    doneBtn.className = "next-btn";
+    doneBtn.style.marginTop = "14px";
+    doneBtn.textContent = "Confirmar";
+    doneBtn.onclick = function() {
+      closeMod();
+      var tc = MODAL_TYPE === "material" ? "mat" : (MODAL_TYPE === "descartavel" ? "desc" : "eqp");
+      renderCat(tc);
+    };
+    bodyEl.appendChild(doneBtn);
+
+  } else {
+    var id = tipo + ":" + prod.n;
+    MODAL_QTD = CART[id] ? CART[id].qtd : 1;
+
+    var lblEl = document.createElement("div");
+    lblEl.style.cssText = "font-size:13px;font-weight:700;color:#6b7280;margin-bottom:12px;";
+    lblEl.textContent = "Quantidade (" + prod.u + ")";
+
+    var ctrlDiv = document.createElement("div");
+    ctrlDiv.style.cssText = "display:flex;align-items:center;gap:16px;justify-content:center;padding:12px 0;";
+
+    var decBtn = document.createElement("button");
+    decBtn.style.cssText = "width:48px;height:48px;border:2px solid #e2e8f0;border-radius:12px;background:#fff;font-size:28px;font-weight:700;cursor:pointer;";
+    decBtn.textContent = "-";
+
+    var valEl = document.createElement("div");
+    valEl.id = "mod-qty";
+    valEl.style.cssText = "min-width:56px;text-align:center;font-size:34px;font-weight:900;color:#0d1f3c;";
+    valEl.textContent = MODAL_QTD;
+
+    var incBtn = document.createElement("button");
+    incBtn.style.cssText = "width:48px;height:48px;border:none;border-radius:12px;background:linear-gradient(135deg,#c9a227,#e8c442);font-size:28px;font-weight:700;cursor:pointer;color:#0a1628;";
+    incBtn.textContent = "+";
+
+    decBtn.onclick = function() {
+      if (MODAL_QTD > 1) { MODAL_QTD--; valEl.textContent = MODAL_QTD; }
+    };
+    incBtn.onclick = function() {
+      MODAL_QTD++;
+      valEl.textContent = MODAL_QTD;
+    };
+
+    ctrlDiv.appendChild(decBtn); ctrlDiv.appendChild(valEl); ctrlDiv.appendChild(incBtn);
+
+    var obsW = document.createElement("div");
+    obsW.style.marginTop = "16px";
+    var obsL = document.createElement("label");
+    obsL.style.cssText = "display:block;font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin-bottom:6px;";
+    obsL.textContent = "Observacao (opcional)";
+    var obsIn = document.createElement("input");
+    obsIn.type = "text";
+    obsIn.id = "mod-obs";
+    obsIn.placeholder = "urgente, substituicao...";
+    obsIn.style.cssText = "width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;";
+    if (CART[id]) obsIn.value = CART[id].obs || "";
+    obsW.appendChild(obsL); obsW.appendChild(obsIn);
+
+    if (CART[id]) {
+      var remBtn = document.createElement("button");
+      remBtn.style.cssText = "width:100%;margin-top:10px;padding:10px;border:1px solid #dc2626;background:#fee2e2;color:#dc2626;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;";
+      remBtn.textContent = "Remover do pedido";
+      remBtn.onclick = function() {
+        delete CART[id];
+        closeMod();
+        updBadge();
+        var tc = tipo === "material" ? "mat" : (tipo === "descartavel" ? "desc" : "eqp");
+        renderCat(tc);
+      };
+      bodyEl.appendChild(remBtn);
+    }
+
+    bodyEl.appendChild(lblEl);
+    bodyEl.appendChild(ctrlDiv);
+    bodyEl.appendChild(obsW);
+
+    var confBtn = document.createElement("button");
+    confBtn.className = "next-btn";
+    confBtn.style.marginTop = "14px";
+    confBtn.textContent = "Confirmar";
+    confBtn.onclick = function() {
+      var obsVal = document.getElementById("mod-obs");
+      CART[id] = {
+        prod: {nome: prod.n, base: prod.n, cat: prod.c, unid: prod.u},
+        qtd: MODAL_QTD, tipo: tipo, obs: obsVal ? obsVal.value : ""
+      };
+      closeMod();
+      updBadge();
+      var tc = tipo === "material" ? "mat" : (tipo === "descartavel" ? "desc" : "eqp");
+      renderCat(tc);
+    };
+    bodyEl.appendChild(confBtn);
+  }
+
+  var bg = document.getElementById("modal-bg");
+  if (bg) bg.classList.add("on");
+}
+
+function closeMod(e) {
+  if (!e || e.target === document.getElementById("modal-bg")) {
+    var bg = document.getElementById("modal-bg");
+    if (bg) bg.classList.remove("on");
+    MODAL_PROD = null;
+  }
+}
+
+// ── CUSTOM ITEM ───────────────────────────────────────────────
+function addCustom(type) {
+  var nEl = document.getElementById("cn-" + type);
+  var tEl = document.getElementById("ct-" + type);
+  var qEl = document.getElementById("cq-" + type);
+  var oEl = document.getElementById("co-" + type);
+  var okEl = document.getElementById("cok-" + type);
+  var nome = nEl ? nEl.value.trim() : "";
+  if (!nome) {
+    if (nEl) { nEl.style.borderColor = "#ef4444"; nEl.focus(); }
+    return;
+  }
+  if (nEl) nEl.style.borderColor = "";
+  var tipo = tEl ? tEl.value : "material";
+  var qtd = Math.max(1, parseInt(qEl ? qEl.value : 1) || 1);
+  var obs = oEl ? oEl.value.trim() : "";
+  var id = "custom:" + nome + "_" + Date.now();
+  CART[id] = {
+    prod: {nome: nome, base: nome, cat: "Personalizado", unid: "und"},
+    qtd: qtd, tipo: tipo, obs: obs, custom: true
+  };
+  if (nEl) nEl.value = "";
+  if (qEl) qEl.value = "1";
+  if (oEl) oEl.value = "";
+  updBadge();
+  if (okEl) {
+    okEl.textContent = '"' + nome + '" adicionado!';
+    okEl.style.display = "block";
+    setTimeout(function() { okEl.style.display = "none"; }, 3000);
+  }
+}
+
+// ── BADGE ─────────────────────────────────────────────────────
+function updBadge() {
+  var el = document.getElementById("cart-n");
+  if (el) el.textContent = Object.keys(CART).length;
+}
+
+// ── CART ──────────────────────────────────────────────────────
+function renderCart() {
+  var keys = Object.keys(CART);
+  var emEl = document.getElementById("cart-empty");
+  var listEl = document.getElementById("cart-list");
+  var totsEl = document.getElementById("cart-totals");
+  var actEl = document.getElementById("cart-actions");
+  if (!listEl) return;
+  listEl.innerHTML = "";
+
+  if (!keys.length) {
+    if (emEl) emEl.style.display = "block";
+    if (totsEl) totsEl.style.display = "none";
+    if (actEl) actEl.style.display = "none";
+    return;
+  }
+  if (emEl) emEl.style.display = "none";
+  if (totsEl) totsEl.style.display = "block";
+  if (actEl) actEl.style.display = "flex";
+
+  var groups = {material: [], descartavel: [], equipamento: []};
+  for (var i = 0; i < keys.length; i++) {
+    var it = CART[keys[i]];
+    if (groups[it.tipo]) groups[it.tipo].push({id: keys[i], item: it});
+  }
+
+  var gdefs = [
+    {key: "material", label: "Materiais / Quimicos", cls: "csec-mat"},
+    {key: "descartavel", label: "Descartaveis", cls: "csec-desc"},
+    {key: "equipamento", label: "Equipamentos", cls: "csec-eqp"}
+  ];
+
+  for (var g = 0; g < gdefs.length; g++) {
+    var gd = gdefs[g];
+    var gitems = groups[gd.key];
+    if (!gitems.length) continue;
+
+    var sec = document.createElement("div");
+    sec.className = "csec-title " + gd.cls;
+    sec.textContent = gd.label + " (" + gitems.length + ")";
+    listEl.appendChild(sec);
+
+    for (var j = 0; j < gitems.length; j++) {
+      (function(entry) {
+        var isCustom = entry.item.custom === true;
+        var row = document.createElement("div");
+        row.className = "citem" + (isCustom ? " custom" : "");
+
+        var emDiv = document.createElement("div");
+        emDiv.className = "cem";
+        emDiv.textContent = "📦";
+
+        var infoDiv = document.createElement("div");
+        infoDiv.className = "cinfo";
+
+        var nameDiv = document.createElement("div");
+        nameDiv.className = "cname";
+        nameDiv.textContent = entry.item.prod.nome;
+        if (isCustom) {
+          var ntag = document.createElement("span");
+          ntag.className = "cnew";
+          ntag.textContent = "NOVO";
+          nameDiv.appendChild(ntag);
+        }
+
+        var obsDiv = document.createElement("div");
+        obsDiv.className = "cobs";
+        var obsIn = document.createElement("input");
+        obsIn.type = "text";
+        obsIn.placeholder = "Observacao...";
+        obsIn.value = entry.item.obs || "";
+        (function(eid) {
+          obsIn.oninput = function() { if (CART[eid]) CART[eid].obs = this.value; };
+        })(entry.id);
+        obsDiv.appendChild(obsIn);
+        infoDiv.appendChild(nameDiv);
+        infoDiv.appendChild(obsDiv);
+
+        var ctrl = document.createElement("div");
+        ctrl.className = "qctrl";
+
+        var dec = document.createElement("button");
+        dec.className = "qbtn";
+        dec.textContent = "-";
+
+        var qv = document.createElement("div");
+        qv.className = "qval";
+        qv.textContent = entry.item.qtd;
+
+        var inc = document.createElement("button");
+        inc.className = "qbtn";
+        inc.textContent = "+";
+
+        var del = document.createElement("button");
+        del.className = "dbtn";
+        del.textContent = "X";
+
+        (function(eid, qvEl) {
+          dec.onclick = function() {
+            if (CART[eid] && CART[eid].qtd > 1) {
+              CART[eid].qtd--;
+              qvEl.textContent = CART[eid].qtd;
+              updTotals();
+              updBadge();
+            }
+          };
+          inc.onclick = function() {
+            if (CART[eid]) {
+              CART[eid].qtd++;
+              qvEl.textContent = CART[eid].qtd;
+              updTotals();
+              updBadge();
+            }
+          };
+          del.onclick = function() {
+            delete CART[eid];
+            renderCart();
+            updBadge();
+          };
+        })(entry.id, qv);
+
+        ctrl.appendChild(dec); ctrl.appendChild(qv); ctrl.appendChild(inc); ctrl.appendChild(del);
+        row.appendChild(emDiv); row.appendChild(infoDiv); row.appendChild(ctrl);
+        listEl.appendChild(row);
+      })(gitems[j]);
+    }
+  }
+  updTotals();
+}
+
+function updTotals() {
+  var keys = Object.keys(CART);
+  var tm = 0, td = 0, te = 0;
+  for (var i = 0; i < keys.length; i++) {
+    var it = CART[keys[i]];
+    if (it.tipo === "material") tm += it.qtd;
+    else if (it.tipo === "descartavel") td += it.qtd;
+    else te += it.qtd;
+  }
+  var tEl = document.getElementById("tot-mat");
+  var dEl = document.getElementById("tot-desc");
+  var eEl = document.getElementById("tot-eqp");
+  var aEl = document.getElementById("tot-all");
+  if (tEl) tEl.textContent = tm + " itens";
+  if (dEl) dEl.textContent = td + " itens";
+  if (eEl) eEl.textContent = te + " itens";
+  if (aEl) aEl.textContent = (tm + td + te) + " itens";
+}
+
+function clearCart() {
+  if (!confirm("Limpar todo o pedido?")) return;
+  CART = {};
+  renderCart();
+  updBadge();
+}
+
+// ── PDF ───────────────────────────────────────────────────────
+function genPDF() {
+  var postoNome = (document.getElementById("posto-nome") || {}).value || "";
+  var asgNome = (document.getElementById("asg-nome") || {}).value || "";
+  var asgFunc = (document.getElementById("asg-func") || {}).value || "ASG";
+  var pedObs = (document.getElementById("ped-obs") || {}).value || "";
+
+  if (!postoNome.trim() || !asgNome.trim()) {
+    alert("Preencha o Nome do Posto e seu Nome antes de gerar o PDF.");
+    goTab("info");
+    return;
+  }
+  if (!Object.keys(CART).length) {
+    alert("Adicione ao menos um item ao pedido.");
+    return;
+  }
+
+  var hoje = new Date();
+  var dataFmt = hoje.toLocaleDateString("pt-BR");
+  var horaFmt = hoje.toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"});
+
+  var keys = Object.keys(CART);
+  var grupos = {material: [], descartavel: [], equipamento: []};
+  for (var i = 0; i < keys.length; i++) {
+    var it = CART[keys[i]];
+    if (grupos[it.tipo]) grupos[it.tipo].push(it);
+  }
+
+  var body = document.getElementById("pdf-body");
+  if (!body) return;
+  body.innerHTML = "";
+  body.style.cssText = "padding:20px;max-width:800px;margin:0 auto;font-family:Arial,sans-serif;color:#111;";
+
+  // Header
+  var hdr = document.createElement("div");
+  hdr.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;margin-bottom:16px;border-bottom:3px solid #c9a227;";
+  var lw = document.createElement("div");
+  lw.style.cssText = "display:flex;align-items:center;gap:12px;";
+  var logoBox = document.createElement("div");
+  logoBox.style.cssText = "width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#0d1f3c,#1a3a6b);border:3px solid #c9a227;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#e8c442;";
+  logoBox.textContent = "G";
+  var cd = document.createElement("div");
+  var cn = document.createElement("div");
+  cn.style.cssText = "font-size:19px;font-weight:900;color:#0d1f3c;";
+  cn.textContent = "Grupo Ourho";
+  var ct = document.createElement("div");
+  ct.style.cssText = "font-size:12px;color:#64748b;font-weight:600;margin-top:2px;";
+  ct.textContent = "Pedido de Materiais - Facilities";
+  cd.appendChild(cn); cd.appendChild(ct);
+  lw.appendChild(logoBox); lw.appendChild(cd);
+  var md = document.createElement("div");
+  md.style.cssText = "text-align:right;font-size:11px;color:#64748b;line-height:1.7;";
+  md.innerHTML = "Emitido em <strong style='color:#0d1f3c'>" + dataFmt + "</strong><br><strong style='color:#0d1f3c'>" + horaFmt + "</strong>";
+  hdr.appendChild(lw); hdr.appendChild(md);
+  body.appendChild(hdr);
+
+  // Info strip
+  var ig = document.createElement("div");
+  ig.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#f0f4ff;border-radius:10px;padding:14px;margin-bottom:18px;border:1px solid #c9a227;";
+  function mkI(lb, vl) {
+    var b = document.createElement("div");
+    var l = document.createElement("div");
+    l.style.cssText = "font-size:9px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;";
+    l.textContent = lb;
+    var v = document.createElement("div");
+    v.style.cssText = "font-size:13px;font-weight:700;color:#0d1f3c;";
+    v.textContent = vl || "--";
+    b.appendChild(l); b.appendChild(v);
+    return b;
+  }
+  ig.appendChild(mkI("Posto / Cliente", postoNome));
+  ig.appendChild(mkI("Data / Hora", dataFmt + " " + horaFmt));
+  ig.appendChild(mkI("Solicitante", asgNome));
+  ig.appendChild(mkI("Funcao", asgFunc));
+  body.appendChild(ig);
+
+  // Summary
+  var sg = document.createElement("div");
+  sg.style.cssText = "display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px;";
+  function mkSum(num, lbl, bg, nc, bc) {
+    var b = document.createElement("div");
+    b.style.cssText = "text-align:center;border-radius:8px;padding:12px;background:" + bg + ";border:1px solid " + bc + ";";
+    var n = document.createElement("div");
+    n.style.cssText = "font-size:28px;font-weight:900;color:" + nc + ";";
+    n.textContent = num;
+    var l = document.createElement("div");
+    l.style.cssText = "font-size:10px;font-weight:700;color:#64748b;text-transform:uppercase;margin-top:2px;";
+    l.textContent = lbl;
+    b.appendChild(n); b.appendChild(l);
+    return b;
+  }
+  sg.appendChild(mkSum(grupos.material.length, "Materiais", "#fefce8", "#92400e", "#c9a227"));
+  sg.appendChild(mkSum(grupos.descartavel.length, "Descartaveis", "#fff7ed", "#c2410c", "#fed7aa"));
+  sg.appendChild(mkSum(grupos.equipamento.length, "Equipamentos", "#eef2ff", "#3730a3", "#c7d2fe"));
+  body.appendChild(sg);
+
+  // Tables
+  var gds = [
+    {key: "material", lbl: "Materiais / Quimicos", bg: "#fefce8", col: "#92400e"},
+    {key: "descartavel", lbl: "Descartaveis", bg: "#fff7ed", col: "#c2410c"},
+    {key: "equipamento", lbl: "Equipamentos", bg: "#e0e7ff", col: "#3730a3"}
+  ];
+  for (var g = 0; g < gds.length; g++) {
+    var gd = gds[g];
+    var gitems = grupos[gd.key];
+    if (!gitems.length) continue;
+
+    var st = document.createElement("div");
+    st.style.cssText = "font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:7px 12px;border-radius:6px;margin:16px 0 8px;background:" + gd.bg + ";color:" + gd.col + ";";
+    st.textContent = gd.lbl;
+    body.appendChild(st);
+
+    var tbl = document.createElement("table");
+    tbl.style.cssText = "width:100%;border-collapse:collapse;margin-bottom:6px;";
+    var thead = document.createElement("thead");
+    var hr = document.createElement("tr");
+    var headers = ["#", "Produto", "Categoria", "Qtd", "Observacao"];
+    for (var h = 0; h < headers.length; h++) {
+      var th = document.createElement("th");
+      th.style.cssText = "background:#0d1f3c;color:#e8c442;padding:9px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;";
+      if (headers[h] === "Qtd") th.style.textAlign = "center";
+      th.textContent = headers[h];
+      hr.appendChild(th);
+    }
+    thead.appendChild(hr); tbl.appendChild(thead);
+
+    var tbody = document.createElement("tbody");
+    for (var ii = 0; ii < gitems.length; ii++) {
+      var git = gitems[ii];
+      var tr = document.createElement("tr");
+      if (ii % 2 === 1) tr.style.background = "#f8fafc";
+
+      function mkTd(txt, extra) {
+        var td = document.createElement("td");
+        td.style.cssText = "padding:8px 12px;border-bottom:1px solid #f1f5f9;font-size:12px;" + (extra || "");
+        td.textContent = txt;
+        return td;
+      }
+
+      tr.appendChild(mkTd(ii + 1, "color:#94a3b8;font-size:11px;"));
+
+      var tdP = document.createElement("td");
+      tdP.style.cssText = "padding:8px 12px;border-bottom:1px solid #f1f5f9;font-size:12px;";
+      var ps = document.createElement("strong");
+      ps.textContent = git.prod.nome;
+      if (git.custom) {
+        var nt = document.createElement("span");
+        nt.style.cssText = "margin-left:6px;background:#c9a227;color:#0a1628;font-size:9px;font-weight:800;padding:2px 7px;border-radius:10px;text-transform:uppercase;";
+        nt.textContent = "NOVO";
+        ps.appendChild(nt);
+      }
+      tdP.appendChild(ps); tr.appendChild(tdP);
+
+      var tdC = document.createElement("td");
+      tdC.style.cssText = "padding:8px 12px;border-bottom:1px solid #f1f5f9;";
+      var cs = document.createElement("span");
+      cs.style.cssText = "background:#f1f5f9;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;";
+      cs.textContent = git.prod.cat;
+      tdC.appendChild(cs); tr.appendChild(tdC);
+
+      tr.appendChild(mkTd(git.qtd, "text-align:center;font-weight:800;font-size:14px;color:#0d1f3c;"));
+      tr.appendChild(mkTd(git.obs || "--", "color:#64748b;font-style:italic;font-size:11px;"));
+      tbody.appendChild(tr);
+    }
+    tbl.appendChild(tbody);
+    body.appendChild(tbl);
+  }
+
+  // Observacoes
+  if (pedObs.trim()) {
+    var ob = document.createElement("div");
+    ob.style.cssText = "background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px;margin:16px 0;font-size:12px;color:#92400e;";
+    var ot = document.createElement("strong");
+    ot.style.cssText = "display:block;margin-bottom:4px;";
+    ot.textContent = "Observacoes Gerais:";
+    ob.appendChild(ot);
+    ob.appendChild(document.createTextNode(pedObs));
+    body.appendChild(ob);
+  }
+
+  // Assinaturas
+  var sga = document.createElement("div");
+  sga.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:32px;";
+  function mkSig(nm, rl) {
+    var b = document.createElement("div");
+    b.style.textAlign = "center";
+    var sp = document.createElement("div");
+    sp.style.height = "52px";
+    var ln = document.createElement("div");
+    ln.style.cssText = "border-top:1.5px solid #0d1f3c;padding-top:8px;";
+    var n2 = document.createElement("div");
+    n2.style.cssText = "font-weight:700;color:#0d1f3c;font-size:12px;";
+    n2.textContent = nm;
+    var r2 = document.createElement("div");
+    r2.style.cssText = "font-size:11px;color:#64748b;";
+    r2.textContent = rl;
+    ln.appendChild(n2); ln.appendChild(r2);
+    b.appendChild(sp); b.appendChild(ln);
+    return b;
+  }
+  sga.appendChild(mkSig(asgNome, asgFunc));
+  sga.appendChild(mkSig("Gestor / Encarregado", "Aprovacao do Pedido"));
+  body.appendChild(sga);
+
+  var ft = document.createElement("div");
+  ft.style.cssText = "text-align:center;margin-top:24px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:10px;color:#94a3b8;";
+  ft.textContent = "Gerado em " + dataFmt + " " + horaFmt + " -- Grupo Ourho -- Facilities Pro 2026";
+  body.appendChild(ft);
+
+  // Show overlay
+  var ov = document.getElementById("pdf-ov");
+  if (ov) ov.classList.add("on");
+  window.scrollTo(0, 0);
+}
+
+function closePDF() {
+  var ov = document.getElementById("pdf-ov");
+  if (ov) ov.classList.remove("on");
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", function() {
+  updBadge();
+});
+</script>
+</body>
+</html>
